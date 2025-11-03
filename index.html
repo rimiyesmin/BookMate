@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookMate | Welcome</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="landing-page">
+    <div class="landing-container hero">
+      <div class="hero-left">
+        <div class="kicker">Discover • Organize • Share</div>
+        <h1 class="hero-title">Welcome to <span class="highlight">BookMate</span></h1>
+        <p class="hero-sub">A cozy place to manage your library, track reads, and borrow with friends. Beautifully simple — always at hand.</p>
+
+        <ul class="feature-list">
+          <li>📖 Track reads & progress</li>
+          <li>🔖 Save favorites & notes</li>
+          <li>🤝 Manage borrowing with ease</li>
+        </ul>
+
+        <div class="landing-buttons">
+          <a href="login.html" class="btn-primary">Login</a>
+          <a href="signup.html" class="btn-secondary">Sign Up</a>
+        </div>
+
+        <div class="trust-row">Used by readers everywhere ✨</div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-card">
+          <!-- Animated SVG book: simple page-flip animation (CSS-driven) -->
+          <div class="animated-book" aria-hidden="true">
+            <!-- More recognizable book SVG with spine, cover and pages -->
+            <svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg" role="img" class="book-svg">
+              <!-- shadow under book -->
+              <ellipse cx="120" cy="145" rx="70" ry="9" fill="rgba(16,24,40,0.06)" />
+
+              <!-- spine -->
+              <rect x="28" y="28" width="20" height="96" rx="3" fill="#5aa8ff" />
+
+              <!-- pages stack (slightly offset) -->
+              <g class="book-pages" transform="translate(52,28)">
+                <rect class="bp bp1" x="0" y="0" width="130" height="96" rx="3" fill="#fffaf6" />
+                <rect class="bp bp2" x="2" y="2" width="128" height="92" rx="3" fill="#fffdf8" />
+                <g class="lines" fill="none" stroke="#dbeff8" stroke-width="1">
+                  <!-- some page lines -->
+                  <path d="M8 18h104" />
+                  <path d="M8 32h104" />
+                  <path d="M8 46h104" />
+                </g>
+              </g>
+
+              <!-- front cover (rotates to simulate open) -->
+              <g class="book-cover" transform="translate(52,28)">
+                <rect x="0" y="0" width="130" height="96" rx="6" fill="url(#covGrad)" />
+                <rect x="12" y="18" width="106" height="16" rx="2" fill="rgba(255,255,255,0.12)" />
+                <rect x="12" y="40" width="86" height="10" rx="2" fill="rgba(255,255,255,0.06)" />
+              </g>
+
+              <defs>
+                <linearGradient id="covGrad" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#dff6ff" />
+                  <stop offset="100%" stop-color="#5aa8ff" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>✨ Made with love by Farzana Yesmin Rimi</p>
+    </footer>
+  </main>
+</body>
+</html>
