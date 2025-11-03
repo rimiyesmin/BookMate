@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookMate | Add Book</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="add-book-page">
+
+<div class="form-container">
+  <h2>Add / Edit Book</h2>
+  <form id="bookForm">
+    <input type="text" id="title" placeholder="Book Title" required>
+    <input type="text" id="author" placeholder="Author Name" required>
+    <input type="text" id="category" placeholder="Category" required>
+    <input type="file" id="cover" accept="image/*">
+    <button type="submit">Save Book</button>
+    <button type="button" id="cancelBtn" style="margin-top:10px;background:#ddd;color:#333;">Cancel</button>
+  </form>
+</div>
+
+<script type="module">
+import { auth, db, storage } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { collection, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+
+let editBookId = localStorage.getItem("editBookId");
+
+// Check auth
+onAuthStateChanged(auth, async user => {
+  if (!user) return window.location.href = "login.html";
+
+  // If editing a book, load its data
+  if(editBookId){
+    const docRef = doc(db, "books", editBookId);
+    const docSnap = await getDoc(docRef);
+    if(docSnap.exists()){
+      const data = docSnap.data();
+      document.getElementById("title").value = data.title || "";
+      document.getElementById("author").value = data.author || "";
+      document.getElementById("category").value = data.category || "";
+    }
+  }
+});
+
+// Form submission
+document.getElementById("bookForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const user = auth.currentUser;
+  if(!user) return;
+
+  const title = document.getElementById("title").value;
+  const author = document.getElementById("author").value;
+  const category = document.getElementById("category").value;
+  const coverFile = document.getElementById("cover").files[0];
+
+  let imageUrl = "";
+
+  // Upload cover image if selected
+  if(coverFile){
+    const storageRef = ref(storage, `bookCovers/${user.uid}_${Date.now()}_${coverFile.name}`);
+    await uploadBytes(storageRef, coverFile);
+    imageUrl = await getDownloadURL(storageRef);
+  }
+
+  if(editBookId){
+    // Update existing book
+    const bookRef = doc(db, "books", editBookId);
+    const updateData = { title, author, category };
+    if(imageUrl) updateData.imageUrl = imageUrl;
+    await updateDoc(bookRef, updateData);
+    localStorage.removeItem("editBookId");
+    alert("Book updated successfully!");
+  } else {
+    // Add new book
+    await addDoc(collection(db, "books"), {
+      title,
+      author,
+      category,
+      imageUrl: imageUrl || "https://via.placeholder.com/200x300?text=No+Image",
+      userId: user.uid,
+      status: "available",
+      borrower: "",
+      dueDate: ""
+    });
+    alert("Book added successfully!");
+  }
+
+  // Redirect back to dashboard
+  window.location.href = "dashboard.html";
+});
+
+// Cancel button
+document.getElementById("cancelBtn").addEventListener("click", ()=>{
+  localStorage.removeItem("editBookId");
+  window.location.href = "dashboard.html";
+});
+</script>
+
+</body>
+</html>

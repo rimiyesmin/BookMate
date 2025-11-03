@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications | BookMate</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="notify-page">
+
+<h2>🔔 Notifications</h2>
+<div id="notifyList"></div>
+<button onclick="window.location.href='dashboard.html'" class="secondary">Back</button>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+const notifyList=document.getElementById("notifyList");
+
+onAuthStateChanged(auth, async user=>{
+  if(!user) return window.location.href="login.html";
+  const q=query(collection(db,"books"), where("userId","==",user.uid));
+  const snapshot=await getDocs(q);
+  notifyList.innerHTML="";
+  const today=new Date().toISOString().split("T")[0];
+  snapshot.forEach(docSnap=>{
+    const book=docSnap.data();
+    if(book.dueDate && book.dueDate<=today){
+      const p=document.createElement("p");
+      p.textContent=`📌 Book "${book.title}" is due on ${book.dueDate}`;
+      notifyList.appendChild(p);
+    }
+  });
+});
+</script>
+</body>
+</html>

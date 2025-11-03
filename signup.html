@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookMate | Sign Up</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+
+<div class="auth-container">
+  <h1>📚 BookMate</h1>
+  <p>Create your account</p>
+
+  <input type="text" id="name" placeholder="Full Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <button id="signupBtn">Sign Up</button>
+  <p>Already have an account? <a href="login.html">Login</a></p>
+</div>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+document.getElementById("signupBtn").addEventListener("click", async () => {
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if (!name) return alert("Enter your name");
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    await setDoc(doc(db, "users", user.uid), { name, email, createdAt: new Date() });
+    alert("Account created!");
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    alert("Sign up failed: " + err.message);
+  }
+});
+</script>
+</body>
+</html>

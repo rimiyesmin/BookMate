@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookMate | Lent Books</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <h2>📚 BookMate</h2>
+  <div class="nav-actions">
+    <button id="darkModeToggle">🌙</button>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</nav>
+
+<section class="books-section">
+  <h3>Books I Lent Out</h3>
+  <div id="lentList" class="book-grid"></div>
+</section>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+const lentList = document.getElementById("lentList");
+
+onAuthStateChanged(auth, async user => {
+  if(!user) return window.location.href="login.html";
+  loadLentBooks(user.uid);
+});
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href="login.html";
+});
+
+async function loadLentBooks(uid){
+  const q = query(collection(db,"books"), where("userId","==", uid));
+  const snapshot = await getDocs(q);
+  lentList.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const book = docSnap.data();
+
+    // Only show borrowed books
+    if(book.status === "borrowed"){
+      const card = document.createElement("div");
+      card.className = "book-card";
+      card.innerHTML = `
+        <img src="${book.imageUrl || 'images/books.png'}" alt="${book.title}">
+        <div class="book-info">
+          <h4>${book.title}</h4>
+          <p>Author: ${book.author}</p>
+          <p>Category: ${book.category || 'N/A'}</p>
+          <p>Borrower: ${book.borrowerName || 'Unknown'}</p>
+          <p>Borrowed At: ${book.borrowDate || 'N/A'}</p>
+          <p>Due Date: ${book.dueDate || 'N/A'}</p>
+        </div>
+        <div class="book-actions">
+          <button class="return" data-id="${docSnap.id}">✅ Mark Returned</button>
+        </div>
+      `;
+      lentList.appendChild(card);
+    }
+  });
+
+  // Return button
+  document.querySelectorAll(".return").forEach(btn => btn.addEventListener("click", async () => {
+    if(!confirm("Mark this book as returned?")) return;
+    await updateDoc(doc(db,"books",btn.dataset.id), {
+      status: "available",
+      borrowerName: "",
+      borrowDate: "",
+      dueDate: ""
+    });
+    alert("Book marked as returned!");
+    loadLentBooks(auth.currentUser.uid);
+  }));
+}
+
+// Dark mode toggle
+document.getElementById("darkModeToggle").addEventListener("click", ()=>{
+  document.body.classList.toggle("dark-mode");
+});
+</script>
+</body>
+</html>
